@@ -1,0 +1,37 @@
+name: Sync upstream
+
+# Fork-only workflow: it keeps this fork's master on top of
+# deepseek-ai/deepseek-harness so the Dokploy webhook rebuilds the image after
+# every upstream change. `origin` here is the fork the job runs in, not the
+# upstream that a local clone of this repository usually calls origin.
+#
+# The merge never rebases: the Docker commit stays reachable, so the push is a
+# fast-forward that needs no --force. A conflict means upstream touched those
+# files, and the job fails rather than publishing a guessed resolution.
+on:
+  schedule:
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-upstream
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: master
+          fetch-depth: 0
+      - name: Merge upstream master
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git remote add upstream https://github.com/deepseek-ai/deepseek-harness.git
+          git fetch --no-tags upstream master
+          git merge --no-edit upstream/master
+          git push origin HEAD:master
