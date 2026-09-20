@@ -5,7 +5,9 @@
 **/node_modules
 **/lib
 **/*.tsbuildinfo
-.env
+**/.env
+**/.env.*
+workspace
 .dsh-build
 .artifacts
 .remember

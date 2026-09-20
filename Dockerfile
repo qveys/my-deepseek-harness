@@ -26,8 +26,8 @@ ENV DSH_HOME=/home/node/.dsh
 WORKDIR /app
 COPY --chown=node:node . .
 USER node
-# CI=true skips the postinstall Lefthook and merge-driver wiring, which needs
-# the .git the build context excludes. The build wants ~4 GB of daemon memory.
+# CI=true skips host Git hook setup. Git metadata stays in the build context
+# for client version metadata. Allocate at least 4 GB to the Docker engine.
 RUN CI=true pnpm install --frozen-lockfile \
   && pnpm run build
 
@@ -35,4 +35,4 @@ RUN CI=true pnpm install --frozen-lockfile \
 # The built bin resolves from /app regardless of the working directory, so the
 # agent's workspace mounts anywhere.
 ENTRYPOINT ["node", "/app/apps/cli/lib/bin.js"]
-CMD ["web", "--no-open"]
+CMD ["--profile", "web", "--no-open"]

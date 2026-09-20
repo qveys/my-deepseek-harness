@@ -2,6 +2,8 @@
 # section, a hash of its English and Chinese blocks outside code blocks and generated regions.
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/development.md
+development.md: 542880bf984a1cff9cfba78c2dbe9fc13ed8cc18
+development.zh.md: 0301c9801c99c2c5677b0c6fbf604dd68aa538ee
 /development-guide:
   en: dd46df776b6c0a69
   zh: 1a46cfc92cca2266

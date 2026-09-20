@@ -2,9 +2,8 @@ name: deepseek-harness
 
 # Both services run the same image; DEEPSEEK_API_KEY and the optional
 # DEEPSEEK_BASE_URL come from the shell or from the root .env, which stays out of
-# the image. dsh-home keeps profiles, sessions, and storages across containers;
-# create ./workspace yourself (`mkdir -p workspace`) or point the bind at the
-# tree the agent should work on.
+# the image. Named volumes retain settings, sessions, and workspace files.
+# Set DSH_WORKSPACE to an existing absolute directory to work on a host tree.
 x-dsh: &dsh
   build: .
   image: deepseek-harness:dev
@@ -15,20 +14,20 @@ x-dsh: &dsh
     - DEEPSEEK_BASE_URL
   volumes:
     - dsh-home:/home/node/.dsh
-    - ./workspace:/workspace
+    - ${DSH_WORKSPACE:-dsh-workspace}:/workspace
 
 services:
   # Web UI: `docker compose up`, then open the tokenized URL printed in the log
   # (`docker compose logs dsh`) — the index rejects a request without its token.
   dsh:
     <<: *dsh
-    command: ["web", "--no-open", "--port", "3080"]
+    command: ["--profile", "web", "--no-open", "--port", "${DSH_PORT:-3080}"]
     # 3081 is the relay's port, not the server's: dsh binds loopback and rejects
     # `--host 0.0.0.0`, and publishing on the host's loopback keeps the exposure
-    # the product intends. The browser still sends `127.0.0.1:3080`, the
-    # authority the /api trust fence and the printed URL expect.
+    # the product intends. The browser and server use the same DSH_PORT so the
+    # /api trust fence accepts the published authority.
     ports:
-      - "127.0.0.1:3080:3081"
+      - "127.0.0.1:${DSH_PORT:-3080}:3081"
 
   # Loopback-to-published relay, the container equivalent of the SSH forward the
   # Web guide describes. Remove this service to keep the UI unreachable.
@@ -37,7 +36,7 @@ services:
     network_mode: "service:dsh"
     depends_on:
       - dsh
-    command: TCP-LISTEN:3081,fork,reuseaddr TCP:127.0.0.1:3080
+    command: TCP-LISTEN:3081,fork,reuseaddr TCP:127.0.0.1:${DSH_PORT:-3080}
 
   # One-shot task, run on demand:
   #   docker compose run --rm headless "run the tests"
@@ -48,3 +47,4 @@ services:
 
 volumes:
   dsh-home:
+  dsh-workspace:

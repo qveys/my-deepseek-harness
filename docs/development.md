@@ -47,6 +47,27 @@ pnpm run typecheck
 
 Setup is complete when `pnpm run typecheck` exits successfully.
 
+### Run with Docker Compose
+
+The root [Dockerfile](../Dockerfile) and [Compose configuration](../docker-compose.yml) build this checkout and launch the Web profile without installing Node.js on the host. Start Docker with at least 4 GB of memory, and set `DEEPSEEK_API_KEY` in the repository's untracked `.env` file; `DEEPSEEK_BASE_URL` is optional. Environment files stay outside the image.
+
+```sh
+docker compose up --build -d
+docker compose logs dsh
+```
+
+Open the tokenized `http://127.0.0.1:3080` URL printed in the logs. If port 3080 is occupied, set `DSH_PORT` to another available port except 3081, which the relay reserves. Compose exposes the UI only on host loopback; the relay service forwards traffic to the application's loopback listener. The container runs as the `node` user, with settings and sessions in `dsh-home` and agent files in `dsh-workspace` at `/workspace`.
+
+To work on a host checkout, set `DSH_WORKSPACE` to its existing absolute path before starting Compose. The container user (UID 1000) needs write permission on that directory. Without this variable, Compose uses its named workspace volume.
+
+Run a one-shot task with the same image and volumes:
+
+```sh
+docker compose run --rm headless "List the files in the workspace"
+```
+
+Use `docker compose down` to stop the services while retaining their volumes. Adding `--volumes` deletes the stored sessions and the named workspace. For Dokploy, use [its Compose configuration](../docker-compose.dokploy.yml), which declares the required public hostname and external network.
+
 ## Contributor reference
 
 ### TypeScript project layout

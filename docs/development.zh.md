@@ -49,6 +49,27 @@ pnpm run typecheck
 
 `pnpm run typecheck` 成功退出即表示搭建完成。
 
+### 使用 Docker Compose 运行
+
+根目录的 [Dockerfile](../Dockerfile) 和 [Compose 配置](../docker-compose.yml) 构建当前检出目录并启动 Web profile，无需在宿主机安装 Node.js。为 Docker 分配至少 4 GB 内存，在仓库未跟踪的 `.env` 文件中设置 `DEEPSEEK_API_KEY`；`DEEPSEEK_BASE_URL` 可选。环境文件不会进入镜像。
+
+```sh
+docker compose up --build -d
+docker compose logs dsh
+```
+
+打开日志中包含 token 的 `http://127.0.0.1:3080` URL。如果端口 3080 已被占用，将 `DSH_PORT` 设置为另一个可用端口，但不能使用中继保留的 3081。Compose 仅在宿主机回环地址暴露 UI；中继服务将流量转发到应用的回环监听器。容器以 `node` 用户运行，设置和会话保存在 `dsh-home`，agent 文件保存在挂载到 `/workspace` 的 `dsh-workspace`。
+
+如需操作宿主机上的检出目录，在启动 Compose 前将 `DSH_WORKSPACE` 设置为该现有目录的绝对路径。容器用户（UID 1000）需要该目录的写入权限。不设置此变量时，Compose 使用命名工作区卷。
+
+使用相同镜像和卷运行一次性任务：
+
+```sh
+docker compose run --rm headless "List the files in the workspace"
+```
+
+使用 `docker compose down` 停止服务并保留卷。添加 `--volumes` 会删除保存的会话和命名工作区。对于 Dokploy，使用[其 Compose 配置](../docker-compose.dokploy.yml)，该配置声明了必需的公开主机名和外部网络。
+
 ## 贡献者参考
 
 <a id="typescript-project-layout"></a>
