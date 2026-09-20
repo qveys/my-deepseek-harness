@@ -2,6 +2,8 @@
 # section, a hash of its English and Chinese blocks outside code blocks and generated regions.
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/core/tools/README.md
+README.md: 2ba07b639394eecc1038db7df65b5a299b7378ef
+README.zh.md: afb21ef78d76f5b6a5b7c1af673526c6c3f8999f
 /:
   en: 3b12a77945c0d1e9
   zh: e9af32047e4f658b
