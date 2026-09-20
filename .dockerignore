@@ -1,0 +1,17 @@
+# The build context carries source and the repository: dependencies and build
+# artifacts are produced inside the image, where a host copy would shadow them,
+# but pnpm run build stamps `git rev-parse HEAD` and `git status` into the client
+# artifacts, so .git must travel with the source.
+**/node_modules
+**/lib
+**/*.tsbuildinfo
+.env
+.dsh-build
+.artifacts
+.remember
+.worktrees
+worktrees
+apps/web/dist
+apps/desktop/.desktop-build
+coverage
+dist-exe

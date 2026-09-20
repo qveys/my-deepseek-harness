@@ -1,0 +1,55 @@
+# Dokploy deployment of the Web UI. Differences from docker-compose.yml: Traefik
+# reaches the service over dokploy-network instead of a published loopback port,
+# the workspace is a named volume because a relative bind would be owned by root,
+# and the public authority must be declared to the browser-trust fence.
+#
+# Point the Dokploy domain at service `dsh`, port 3081 — the relay's listener,
+# because dsh itself binds loopback. The Web UI index still requires the token
+# printed at startup, so read it once from the container log.
+#
+# Exposing this publicly grants arbitrary code execution to whoever holds the
+# token: serve it over HTTPS and keep a Traefik auth middleware in front.
+name: my-deepseek-harness
+
+services:
+  dsh:
+    build: .
+    image: my-deepseek-harness:dev
+    init: true
+    working_dir: /workspace
+    command:
+      - web
+      - --no-open
+      - --port
+      - "3080"
+      # The authority the browser sends. Without it every /api request is 403.
+      - --trusted-host
+      - "${DSH_PUBLIC_HOST:?set DSH_PUBLIC_HOST to the authority Traefik serves, e.g. dsh.example.com}"
+    environment:
+      - DEEPSEEK_API_KEY
+      - DEEPSEEK_BASE_URL
+    volumes:
+      - dsh-home:/home/node/.dsh
+      - dsh-workspace:/workspace
+    networks:
+      - dokploy-network
+    expose:
+      - "3081"
+
+  # Loopback-to-network relay; `dsh web` rejects `--host 0.0.0.0`, so Traefik
+  # cannot reach the server directly. Sharing the netns keeps the Host header,
+  # which is what the trust fence reads.
+  web-relay:
+    image: alpine/socat:latest
+    network_mode: "service:dsh"
+    depends_on:
+      - dsh
+    command: TCP-LISTEN:3081,fork,reuseaddr TCP:127.0.0.1:3080
+
+networks:
+  dokploy-network:
+    external: true
+
+volumes:
+  dsh-home:
+  dsh-workspace:
