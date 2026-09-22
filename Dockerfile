@@ -4,11 +4,13 @@
 FROM node:24-bookworm-slim
 
 # build-essential and python3 compile node-pty during install and the flock
-# addon during build:native-system; git backs the harness's repository tools.
+# addon; musl-tools provides musl-gcc for the static landlock-run launcher;
+# git backs the harness's repository tools.
 RUN apt-get update && apt-get install -y --no-install-recommends \
       build-essential \
       ca-certificates \
       git \
+      musl-tools \
       python3 \
   && rm -rf /var/lib/apt/lists/*
 
@@ -28,8 +30,11 @@ COPY --chown=node:node . .
 USER node
 # CI=true skips host Git hook setup. Git metadata stays in the build context
 # for client version metadata. Allocate at least 4 GB to the Docker engine.
+# The root build compiles only the host addon; the full native build also emits
+# the static landlock-run launcher the sandbox probe requires to report usable.
 RUN CI=true pnpm install --frozen-lockfile \
-  && pnpm run build
+  && pnpm run build \
+  && pnpm --dir native/system run build:native
 
 # `dsh` is the only supported launcher (docs/architecture.md#application-launch).
 # The built bin resolves from /app regardless of the working directory, so the
