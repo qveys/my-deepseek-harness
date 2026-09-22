@@ -35,6 +35,11 @@ services:
       - dokploy-network
     expose:
       - "3081"
+    # Publish the relay on host loopback so a host-local client (e.g. a
+    # Cloudflare Tunnel targeting localhost:3081) can reach it. Loopback only:
+    # the tokenized UI must never bind a public interface.
+    ports:
+      - "127.0.0.1:3081:3081"
 
   # Loopback-to-network relay; `dsh web` rejects `--host 0.0.0.0`, so Traefik
   # cannot reach the server directly. Sharing the netns keeps the Host header,
