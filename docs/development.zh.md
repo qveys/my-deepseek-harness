@@ -51,7 +51,7 @@ pnpm run typecheck
 
 ### 使用 Docker Compose 运行
 
-根目录的 [Dockerfile](../Dockerfile) 和 [Compose 配置](../docker-compose.yml) 构建当前检出目录并启动 Web profile，无需在宿主机安装 Node.js。为 Docker 分配至少 4 GB 内存，在仓库未跟踪的 `.env` 文件中设置 `DEEPSEEK_API_KEY`；`DEEPSEEK_BASE_URL` 可选。环境文件不会进入镜像。
+根目录的 [Dockerfile](../Dockerfile) 和 [Compose 配置](../docker-compose.yml) 构建当前检出目录并启动 Web profile，无需在宿主机安装 Node.js。为 Docker 分配至少 4 GB 内存，在仓库未跟踪的 `.env` 文件中设置 `DEEPSEEK_API_KEY`；`DEEPSEEK_BASE_URL` 可选。[`.env.example`](../.env.example) 列出了 Compose 文件读取的全部变量。环境文件不会进入镜像。
 
 ```sh
 docker compose up --build -d
@@ -68,7 +68,7 @@ docker compose logs dsh
 docker compose run --rm headless "List the files in the workspace"
 ```
 
-使用 `docker compose down` 停止服务并保留卷。添加 `--volumes` 会删除保存的会话和命名工作区。对于 Dokploy，使用[其 Compose 配置](../docker-compose.dokploy.yml)，该配置声明了必需的公开主机名和外部网络。
+使用 `docker compose down` 停止服务并保留卷。添加 `--volumes` 会删除保存的会话和命名工作区。对于 Dokploy，使用[其 Compose 配置](../docker-compose.dokploy.yml)，该配置要求将 `DSH_PUBLIC_HOST` 设置为公开主机名，并需要一个外部网络。
 
 ## 贡献者参考
 

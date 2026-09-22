@@ -49,7 +49,7 @@ Setup is complete when `pnpm run typecheck` exits successfully.
 
 ### Run with Docker Compose
 
-The root [Dockerfile](../Dockerfile) and [Compose configuration](../docker-compose.yml) build this checkout and launch the Web profile without installing Node.js on the host. Start Docker with at least 4 GB of memory, and set `DEEPSEEK_API_KEY` in the repository's untracked `.env` file; `DEEPSEEK_BASE_URL` is optional. Environment files stay outside the image.
+The root [Dockerfile](../Dockerfile) and [Compose configuration](../docker-compose.yml) build this checkout and launch the Web profile without installing Node.js on the host. Start Docker with at least 4 GB of memory, and set `DEEPSEEK_API_KEY` in the repository's untracked `.env` file; `DEEPSEEK_BASE_URL` is optional. [`.env.example`](../.env.example) lists every variable the Compose files read. Environment files stay outside the image.
 
 ```sh
 docker compose up --build -d
@@ -66,7 +66,7 @@ Run a one-shot task with the same image and volumes:
 docker compose run --rm headless "List the files in the workspace"
 ```
 
-Use `docker compose down` to stop the services while retaining their volumes. Adding `--volumes` deletes the stored sessions and the named workspace. For Dokploy, use [its Compose configuration](../docker-compose.dokploy.yml), which declares the required public hostname and external network.
+Use `docker compose down` to stop the services while retaining their volumes. Adding `--volumes` deletes the stored sessions and the named workspace. For Dokploy, use [its Compose configuration](../docker-compose.dokploy.yml), which requires `DSH_PUBLIC_HOST` set to the public hostname and an external network.
 
 ## Contributor reference
 
