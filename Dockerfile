@@ -14,6 +14,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       python3 \
   && rm -rf /var/lib/apt/lists/*
 
+# gh from GitHub's apt repository; it authenticates from GH_TOKEN and serves as
+# git's credential helper for github.com, so HTTPS push uses the same token.
+ADD --chmod=644 https://cli.github.com/packages/githubcli-archive-keyring.gpg /usr/share/keyrings/githubcli-archive-keyring.gpg
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+      > /etc/apt/sources.list.d/github-cli.list \
+  && apt-get update && apt-get install -y --no-install-recommends gh \
+  && rm -rf /var/lib/apt/lists/* \
+  && git config --system credential.https://github.com.helper '!gh auth git-credential'
+
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 RUN corepack enable
 

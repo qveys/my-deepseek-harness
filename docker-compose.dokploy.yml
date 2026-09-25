@@ -28,6 +28,8 @@ services:
     environment:
       - DEEPSEEK_API_KEY
       - DEEPSEEK_BASE_URL
+      # Authenticates gh and git pushes to github.com.
+      - GH_TOKEN
     volumes:
       - dsh-home:/home/node/.dsh
       - dsh-workspace:/workspace
